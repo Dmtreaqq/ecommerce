@@ -11,7 +11,6 @@ export const PRODUCT_SORTS = [
 export type ProductSort = (typeof PRODUCT_SORTS)[number];
 
 export class FindProductsDto {
-  /** Validated against the same tuple the entity exports, so the two can't drift. */
   @IsOptional()
   @IsIn(CATEGORIES)
   category?: Category;
