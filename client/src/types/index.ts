@@ -12,7 +12,6 @@ export type Rating = 1 | 2 | 3 | 4 | 5
 
 export interface Product {
   id: string
-  slug: string
   name: string
   brand: string
   category: Category

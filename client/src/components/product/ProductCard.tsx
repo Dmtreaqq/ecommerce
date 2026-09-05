@@ -42,7 +42,7 @@ function ProductCardComponent({ product }: ProductCardProps) {
     >
       <CardActionArea
         component={RouterLink}
-        to={`/product/${product.slug}`}
+        to={`/product/${product.id}`}
         sx={{
           height: '100%',
           display: 'flex',

@@ -23,7 +23,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: withSuspense(<HomePage />) },
-      { path: 'product/:slug', element: withSuspense(<ProductPage />) },
+      { path: 'product/:id', element: withSuspense(<ProductPage />) },
       { path: 'signin', element: withSuspense(<SignInPage />) },
       { path: '*', element: withSuspense(<NotFoundPage />) },
     ],

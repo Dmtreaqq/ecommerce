@@ -1,4 +1,3 @@
-import { MOCK_PRODUCTS } from '../mocks/products'
 import { MOCK_REVIEWS } from '../mocks/reviews'
 import { MOCK_USERS } from '../mocks/users'
 import type { Product, Review, Session, StoredUser } from '../types'
@@ -55,9 +54,13 @@ let reviews: Review[] = readJson<Review[]>(KEYS.reviews) ?? [...MOCK_REVIEWS]
 const users: StoredUser[] = MOCK_USERS
 
 export const db = {
-  /** Products with `ratingAverage` / `ratingCount` derived from live reviews. */
-  getProducts(): Product[] {
-    return MOCK_PRODUCTS.map((product) => {
+  /**
+   * Overlays review-derived `ratingAverage` / `ratingCount` onto products
+   * fetched from the API. Reviews are still client-side, so the server's seed
+   * rating values are replaced outright rather than merged.
+   */
+  withLiveRatings(products: Product[]): Product[] {
+    return products.map((product) => {
       const productReviews = reviews.filter((r) => r.productId === product.id)
       const total = productReviews.length
       const average =

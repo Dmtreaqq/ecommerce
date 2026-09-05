@@ -96,13 +96,27 @@ src/
 Components never import from `api/` or `mocks/` directly — data reaches them
 through hooks and props.
 
-## Swapping in the real API
+## The API
 
-The mock layer is deliberately shaped like the REST API that will replace it:
+**Products are live.** They come from the NestJS server in [`../server`](../server), which
+must be running on `http://localhost:3000` (override with `VITE_API_URL` — see
+[`.env.example`](.env.example)). Start it with `npm run start:dev` from `server/`.
+
+| Function | Endpoint |
+|---|---|
+| `getProducts` | `GET /products?category=&search=&sort=` |
+| `getProductById` | `GET /products/:id` |
+
+Filtering, search and sort are server-side; the server validates the query params
+and returns `400` for an unknown `category` or `sort`. Product images are served by
+the same host from `/images/products/`, and [`src/api/products.api.ts`](src/api/products.api.ts)
+resolves them to absolute URLs so components can use `product.image` directly.
+
+**Reviews and auth are still mocked**, backed by `localStorage` via
+[`src/api/db.ts`](src/api/db.ts):
 
 | Function | Endpoint it stands in for |
 |---|---|
-| `getProducts` / `getProductBySlug` | `GET /products`, `GET /products/:slug` |
 | `listReviews` | `GET /products/:id/reviews?sort=&rating=&page=&perPage=` |
 | `getReviewStats` | `GET /products/:id/reviews/stats` |
 | `createReview` | `POST /reviews` |
@@ -110,15 +124,14 @@ The mock layer is deliberately shaped like the REST API that will replace it:
 | `voteHelpful` | `POST /reviews/:id/helpful` |
 | `signIn` / `signOut` / `getSession` | `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` |
 
-To go live:
+Because reviews are local, `db.withLiveRatings()` overlays each product's
+`ratingAverage` / `ratingCount` from the review store, replacing the server's seed
+values. That is also why `sort=rating` is re-sorted client-side after the overlay —
+otherwise the order would follow the server's ratings while the stars showed local ones.
 
-1. Replace `request()` in [`src/api/client.ts`](src/api/client.ts) with a
-   `fetch` wrapper. It already accepts an `AbortSignal` and throws `ApiError`,
-   so callers need no changes.
-2. Rewrite the bodies of the `*.api.ts` modules to call real endpoints.
-3. Delete [`src/api/db.ts`](src/api/db.ts) and [`src/mocks/`](src/mocks/).
-
-No hook, context or component should need to change.
+To finish the migration: rewrite `reviews.api.ts` and `auth.api.ts` to call `http()`
+instead of `request()`, then delete `request()`, [`src/api/db.ts`](src/api/db.ts) and
+[`src/mocks/`](src/mocks/). No hook, context or component should need to change.
 
 ## Persistence
 

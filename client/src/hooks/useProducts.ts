@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { isAbortError, toErrorMessage } from '../api/client'
-import { getProductBySlug, getProducts } from '../api/products.api'
+import { getProductById, getProducts } from '../api/products.api'
 import type { Category, Product, ProductSort } from '../types'
 
 /**
@@ -23,8 +23,8 @@ interface ListState {
 }
 
 /**
- * Fetches the catalogue for the given filters. Filtering happens in the api
- * layer so the same call shape works against the real REST endpoint later.
+ * Fetches the catalogue for the given filters. Filtering, search and sort are
+ * server-side — the filters are forwarded as query params.
  */
 export function useProducts(
   category: Category | null,
@@ -64,26 +64,26 @@ interface DetailState {
   error: string | null
 }
 
-export function useProduct(slug: string | undefined): DetailState {
-  const key = slug ?? ''
+export function useProduct(id: string | undefined): DetailState {
+  const key = id ?? ''
   const [settled, setSettled] = useState<Settled<Product>>(EMPTY)
 
   useEffect(() => {
-    if (!slug) return
+    if (!id) return
 
     const controller = new AbortController()
 
-    getProductBySlug(slug, controller.signal)
-      .then((product) => setSettled({ key: slug, data: product, error: null }))
+    getProductById(id, controller.signal)
+      .then((product) => setSettled({ key: id, data: product, error: null }))
       .catch((error: unknown) => {
         if (isAbortError(error)) return
-        setSettled({ key: slug, data: null, error: toErrorMessage(error) })
+        setSettled({ key: id, data: null, error: toErrorMessage(error) })
       })
 
     return () => controller.abort()
-  }, [slug])
+  }, [id])
 
-  if (!slug) {
+  if (!id) {
     return { product: null, loading: false, error: 'Product not found' }
   }
 

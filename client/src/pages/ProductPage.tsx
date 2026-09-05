@@ -21,8 +21,8 @@ import { useProduct } from '../hooks/useProducts'
 import { formatPrice } from '../utils/format'
 
 export default function ProductPage() {
-  const { slug } = useParams<{ slug: string }>()
-  const { product, loading, error } = useProduct(slug)
+  const { id } = useParams<{ id: string }>()
+  const { product, loading, error } = useProduct(id)
 
   if (loading) {
     return (
