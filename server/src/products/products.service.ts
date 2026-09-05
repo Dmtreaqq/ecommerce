@@ -7,12 +7,7 @@ import { MOCK_PRODUCTS } from './mocks/products.js';
 export class ProductsService {
   private readonly products: Product[] = MOCK_PRODUCTS;
 
-  /**
-   * Filtering, search and sort are server-side concerns — the client only
-   * forwards its query string.
-   */
   findAll(query: FindProductsDto = {}): Product[] {
-    // Already validated by the global ValidationPipe; only defaults are applied.
     const { category = null, sort = 'featured' } = query;
     const term = (query.search ?? '').trim().toLowerCase();
 
@@ -39,7 +34,6 @@ export class ProductsService {
       case 'rating':
         return [...items].sort((a, b) => b.ratingAverage - a.ratingAverage);
       default:
-        // Never hand back the private array itself.
         return items === this.products ? [...items] : items;
     }
   }
