@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Gaming chair illustration">
+  <defs>
+    <linearGradient id="hbg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1b2233"/>
+      <stop offset="100%" stop-color="#0d1220"/>
+    </linearGradient>
+    <linearGradient id="hseat" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3f4d63"/>
+      <stop offset="100%" stop-color="#1c2534"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#hbg2)"/>
+  <circle cx="200" cy="150" r="112" fill="#f472b6" opacity="0.07"/>
+  <g transform="translate(200 150)">
+    <rect x="-52" y="-116" width="104" height="146" rx="26" fill="url(#hseat)" stroke="#0b0f1a" stroke-width="3"/>
+    <rect x="-34" y="-100" width="68" height="40" rx="14" fill="#0f172a" opacity="0.5"/>
+    <rect x="-34" y="-52" width="68" height="34" rx="12" fill="#0f172a" opacity="0.5"/>
+    <rect x="-40" y="-110" width="8" height="128" rx="4" fill="#22d3ee" opacity="0.5"/>
+    <rect x="32" y="-110" width="8" height="128" rx="4" fill="#22d3ee" opacity="0.5"/>
+    <rect x="-66" y="26" width="132" height="26" rx="12" fill="url(#hseat)" stroke="#0b0f1a" stroke-width="3"/>
+    <rect x="-6" y="52" width="12" height="34" rx="5" fill="#64748b"/>
+    <g stroke="#64748b" stroke-width="8" stroke-linecap="round">
+      <path d="M0 86 L-50 106"/><path d="M0 86 L50 106"/><path d="M0 86 L0 112"/>
+    </g>
+    <g fill="#334155">
+      <circle cx="-54" cy="110" r="9"/><circle cx="54" cy="110" r="9"/><circle cx="0" cy="116" r="9"/>
+    </g>
+  </g>
+</svg>

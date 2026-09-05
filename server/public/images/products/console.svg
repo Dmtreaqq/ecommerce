@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300" role="img" aria-label="Games console illustration">
+  <defs>
+    <linearGradient id="cbg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1b2233"/>
+      <stop offset="100%" stop-color="#0d1220"/>
+    </linearGradient>
+    <linearGradient id="cbody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f2f5fa"/>
+      <stop offset="100%" stop-color="#c3ccdb"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#cbg)"/>
+  <circle cx="200" cy="150" r="108" fill="#22d3ee" opacity="0.07"/>
+  <g transform="translate(200 152)">
+    <rect x="-30" y="-92" width="60" height="184" rx="10" fill="#0b0f1a" opacity="0.55"/>
+    <path d="M-46 -88 Q-30 -96 -12 -92 L-12 92 Q-30 96 -46 88 Z" fill="url(#cbody)"/>
+    <path d="M46 -88 Q30 -96 12 -92 L12 92 Q30 96 46 88 Z" fill="url(#cbody)"/>
+    <rect x="-8" y="-86" width="16" height="172" rx="6" fill="#111827"/>
+    <rect x="-3" y="-60" width="6" height="52" rx="3" fill="#22d3ee"/>
+    <circle cx="0" cy="70" r="7" fill="#22d3ee" opacity="0.85"/>
+  </g>
+  <rect x="132" y="252" width="136" height="10" rx="5" fill="#0b0f1a" opacity="0.5"/>
+</svg>
