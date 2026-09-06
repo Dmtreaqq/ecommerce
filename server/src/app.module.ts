@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AppController } from './app.controller.js';
-import { AppService } from './app.service.js';
 import { CommonConfig } from './common/common.config.js';
 import { CommonModule } from './common/common.module.js';
 import { configDynamicModule } from './config-dynamic-module.js';
-import { UsersModule } from './users/users.module.js';
-import { ProductsModule } from './products/products.module.js';
+import { UsersModule } from './features/users/users.module.js';
+import { ProductsModule } from './features/products/products.module.js';
 
 @Module({
   imports: [
@@ -30,7 +28,7 @@ import { ProductsModule } from './products/products.module.js';
     UsersModule,
     ProductsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}
