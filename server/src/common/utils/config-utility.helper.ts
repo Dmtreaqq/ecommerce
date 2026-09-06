@@ -19,6 +19,10 @@ export const configUtilityHelper = {
     return null;
   },
 
+  convertToNumber(value: string | undefined): number {
+    return value === undefined ? NaN : Number(value);
+  },
+
   getEnumValues<T extends Record<string, string>>(enumObj: T): string[] {
     return Object.values(enumObj);
   },

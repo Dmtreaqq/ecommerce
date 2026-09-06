@@ -1,4 +1,4 @@
-import { Injectable, type OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   IsBoolean,
@@ -17,7 +17,7 @@ export enum Environments {
 }
 
 @Injectable()
-export class CommonConfig implements OnModuleInit {
+export class CommonConfig {
   @IsEnum(Environments, {
     message:
       'Set correct NODE_ENV value, available values: ' +
@@ -58,14 +58,18 @@ export class CommonConfig implements OnModuleInit {
   isDbLogging: boolean;
 
   constructor(configService: ConfigService) {
-    const read = (key: string) => configService.get<string>(key)?.trim();
+    const read = (key: string) => {
+      const value = configService.get<string>(key)?.trim();
+
+      return value === '' ? undefined : value;
+    };
 
     this.env = read('NODE_ENV') ?? Environments.Development;
-    this.port = Number(read('PORT'));
+    this.port = configUtilityHelper.convertToNumber(read('PORT'));
     this.corsOrigin = read('CORS_ORIGIN');
 
     this.dbHost = read('DB_HOST') as string;
-    this.dbPort = Number(read('DB_PORT'));
+    this.dbPort = configUtilityHelper.convertToNumber(read('DB_PORT'));
     this.dbUser = read('DB_USER') as string;
     this.dbPassword = read('DB_PASSWORD') as string;
     this.dbName = read('DB_NAME') as string;
@@ -76,9 +80,7 @@ export class CommonConfig implements OnModuleInit {
     this.isDbLogging = configUtilityHelper.convertToBoolean(
       read('IS_DB_LOGGING'),
     ) as boolean;
-  }
 
-  onModuleInit() {
     configUtilityHelper.validateConfig(this);
   }
 }
