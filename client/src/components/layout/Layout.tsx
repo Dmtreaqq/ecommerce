@@ -20,8 +20,7 @@ export function Layout() {
         <Divider />
         <Container maxWidth="lg" sx={{ py: 3 }}>
           <Typography variant="body2" color="text.secondary" align={"center"}>
-            GameVault — a demo storefront. Products, reviews and accounts are
-            mock data.
+            GameVault — a demo storefront. Accounts are mock data.
           </Typography>
         </Container>
       </Box>

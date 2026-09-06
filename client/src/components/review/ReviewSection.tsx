@@ -15,10 +15,8 @@ import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
 import { useCallback, useState } from 'react'
-import { toErrorMessage } from '../../api/client'
-import { useAuth } from '../../hooks/useAuth'
 import { useReviews } from '../../hooks/useReviews'
-import type { Review, ReviewDraft } from '../../types'
+import type { ReviewDraft } from '../../types'
 import { EmptyState, ErrorState, LoadingState } from '../common/StateViews'
 import { ReviewCard } from './ReviewCard'
 import { ReviewFilters } from './ReviewFilters'
@@ -33,12 +31,10 @@ interface ReviewSectionProps {
 export function ReviewSection({ productId, productName }: ReviewSectionProps) {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const { user } = useAuth()
 
   const {
     reviews,
     stats,
-    myReview,
     page,
     totalPages,
     total,
@@ -46,79 +42,28 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
     error,
     sort,
     ratingFilter,
-    votedIds,
     setSort,
     setRatingFilter,
     setPage,
     createReview,
-    updateReview,
-    deleteReview,
-    toggleHelpful,
-  } = useReviews(productId, user?.id ?? null)
+  } = useReviews(productId)
 
   const [formOpen, setFormOpen] = useState(false)
-  const [editing, setEditing] = useState<Review | null>(null)
   const [toast, setToast] = useState<string | null>(null)
-  const [actionError, setActionError] = useState<string | null>(null)
 
-  const closeForm = useCallback(() => {
-    setFormOpen(false)
-    setEditing(null)
-  }, [])
-
-  const openNewForm = useCallback(() => {
-    setEditing(null)
-    setFormOpen(true)
-  }, [])
-
-  const openEditForm = useCallback((review: Review) => {
-    setEditing(review)
-    setFormOpen(true)
-  }, [])
+  const closeForm = useCallback(() => setFormOpen(false), [])
+  const openForm = useCallback(() => setFormOpen(true), [])
 
   const handleSubmit = useCallback(
     async (values: Omit<ReviewDraft, 'productId'>) => {
-      if (editing) {
-        await updateReview(editing.id, {
-          rating: values.rating,
-          title: values.title,
-          body: values.body,
-        })
-        setToast('Your review has been updated.')
-      } else {
-        await createReview(values)
-        setToast('Thanks! Your review has been posted.')
-      }
+      await createReview(values)
+      setToast('Thanks! Your review has been posted.')
       closeForm()
     },
-    [editing, updateReview, createReview, closeForm],
+    [createReview, closeForm],
   )
 
-  const handleDelete = useCallback(
-    async (review: Review) => {
-      setActionError(null)
-      try {
-        await deleteReview(review.id)
-        setToast('Your review has been deleted.')
-      } catch (error: unknown) {
-        setActionError(toErrorMessage(error))
-      }
-    },
-    [deleteReview],
-  )
-
-  // A signed-in user gets one review per product; offer editing instead.
-  const alreadyReviewed = Boolean(myReview) && !editing
-
-  const form = (
-    <ReviewForm
-      key={editing?.id ?? 'new'}
-      initialReview={editing}
-      isSignedIn={Boolean(user)}
-      onSubmit={handleSubmit}
-      onCancel={closeForm}
-     />
-  )
+  const form = <ReviewForm onSubmit={handleSubmit} onCancel={closeForm} />
 
   return (
     <Paper
@@ -143,22 +88,18 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
         spacing={2} sx={{ alignItems: { xs: 'stretch', sm: 'center' }, justifyContent: "space-between", mb: 2 }}>
         <Box>
           <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-            {alreadyReviewed
-              ? 'You reviewed this product'
-              : 'Share your thoughts'}
+            Share your thoughts
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {alreadyReviewed
-              ? 'You can edit or delete your review below.'
-              : `Tell other gamers what you think of the ${productName}.`}
+            {`Tell other gamers what you think of the ${productName}.`}
           </Typography>
         </Box>
 
-        {!alreadyReviewed && !formOpen ? (
+        {!formOpen ? (
           <Button
             variant="contained"
             startIcon={<RateReviewOutlinedIcon />}
-            onClick={openNewForm}
+            onClick={openForm}
             sx={{ flexShrink: 0 }}
           >
             Write a review
@@ -169,16 +110,14 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
       {/* Inline on desktop, full-screen dialog on mobile. */}
       {isMobile ? (
         <Dialog fullScreen open={formOpen} onClose={closeForm}>
-          <DialogTitle>
-            {editing ? 'Edit your review' : 'Write a review'}
-          </DialogTitle>
+          <DialogTitle>Write a review</DialogTitle>
           <DialogContent dividers>{form}</DialogContent>
         </Dialog>
       ) : (
         <Collapse in={formOpen} unmountOnExit>
           <Paper variant="outlined" sx={{ p: 3, mb: 3, bgcolor: 'action.hover' }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 2 }}>
-              {editing ? 'Edit your review' : 'Write a review'}
+              Write a review
             </Typography>
             {form}
           </Paper>
@@ -194,8 +133,6 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
         onSortChange={setSort}
         onClearRating={() => setRatingFilter(null)}
        />
-
-      {actionError ? <ErrorState message={actionError} /> : null}
 
       {loading ? (
         <LoadingState label="Loading reviews…" />
@@ -219,8 +156,8 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
               <Button onClick={() => setRatingFilter(null)}>
                 Clear filter
               </Button>
-            ) : !alreadyReviewed && !formOpen ? (
-              <Button variant="contained" onClick={openNewForm}>
+            ) : !formOpen ? (
+              <Button variant="contained" onClick={openForm}>
                 Write a review
               </Button>
             ) : undefined
@@ -230,15 +167,7 @@ export function ReviewSection({ productId, productName }: ReviewSectionProps) {
         <>
           <Box sx={{ mt: 1 }} aria-live="polite">
             {reviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-                isOwn={Boolean(user) && review.authorId === user?.id}
-                hasVoted={votedIds.has(review.id)}
-                onToggleHelpful={toggleHelpful}
-                onEdit={openEditForm}
-                onDelete={handleDelete}
-               />
+              <ReviewCard key={review.id} review={review} />
             ))}
           </Box>
 
