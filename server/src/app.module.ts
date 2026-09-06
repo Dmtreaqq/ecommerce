@@ -3,8 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonConfig } from './common/common.config.js';
 import { CommonModule } from './common/common.module.js';
 import { configDynamicModule } from './config-dynamic-module.js';
-import { UsersModule } from './users/users.module.js';
-import { ProductsModule } from './products/products.module.js';
+import { UsersModule } from './features/users/users.module.js';
+import { ProductsModule } from './features/products/products.module.js';
 
 @Module({
   imports: [
