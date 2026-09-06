@@ -19,6 +19,7 @@ import { ProductsModule } from './features/products/products.module.js';
         username: commonConfig.dbUser,
         password: commonConfig.dbPassword,
         database: commonConfig.dbName,
+        uuidExtension: 'pgcrypto',
         autoLoadEntities: true,
         synchronize: false,
         ssl: commonConfig.isDbSsl,

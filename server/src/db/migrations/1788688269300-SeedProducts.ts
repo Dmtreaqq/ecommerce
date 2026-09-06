@@ -1,13 +1,25 @@
-import { Product } from '../entities/product.entity.js';
+import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export const MOCK_PRODUCTS: Product[] = [
+type SeedProduct = {
+  name: string;
+  brand: string;
+  category: string;
+  priceCents: number;
+  originalPriceCents: number | null;
+  image: string;
+  description: string;
+  features: string[];
+  stock: number;
+  ratingAverage: number;
+};
+
+const PRODUCTS: SeedProduct[] = [
   {
-    id: 'p1',
     name: 'Nexus Station XXX',
     brand: 'Nexus',
     category: 'Consoles',
-    price: 499.99,
-    originalPrice: 549.99,
+    priceCents: 49999,
+    originalPriceCents: 54999,
     image: '/images/products/console.svg',
     description:
       'The flagship Nexus console with a custom 8-core CPU and ray-traced 4K output at 120fps. Ships with a 1TB NVMe drive and the redesigned haptic controller.',
@@ -19,14 +31,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 12,
     ratingAverage: 4.6,
-    ratingCount: 0,
   },
   {
-    id: 'p2',
     name: 'Nexus Station X Slim',
     brand: 'Nexus',
     category: 'Consoles',
-    price: 399.99,
+    priceCents: 39999,
+    originalPriceCents: null,
     image: '/images/products/console.svg',
     description:
       'A 30% smaller Nexus Station X with the same silicon in a fully digital, disc-free chassis. Runs quieter and draws less power.',
@@ -38,15 +49,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 27,
     ratingAverage: 4.3,
-    ratingCount: 0,
   },
   {
-    id: 'p3',
     name: 'Pulse Elite Wireless Controller',
     brand: 'Pulse',
     category: 'Peripherals',
-    price: 79.99,
-    originalPrice: 99.99,
+    priceCents: 7999,
+    originalPriceCents: 9999,
     image: '/images/products/controller.svg',
     description:
       'Hall-effect thumbsticks that never drift, four remappable back paddles, and 40 hours of battery on a single charge.',
@@ -58,14 +67,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 64,
     ratingAverage: 4.7,
-    ratingCount: 0,
   },
   {
-    id: 'p4',
     name: 'Aurora 7 Gaming Headset',
     brand: 'Aurora',
     category: 'Peripherals',
-    price: 149.99,
+    priceCents: 14999,
+    originalPriceCents: null,
     image: '/images/products/headset.svg',
     description:
       '50mm planar drivers with spatial audio and a broadcast-grade detachable boom mic. Memory-foam earcups rated for all-day sessions.',
@@ -77,15 +85,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 41,
     ratingAverage: 4.4,
-    ratingCount: 0,
   },
   {
-    id: 'p5',
     name: 'Volt TKL Mechanical Keyboard',
     brand: 'Volt',
     category: 'Peripherals',
-    price: 129.99,
-    originalPrice: 159.99,
+    priceCents: 12999,
+    originalPriceCents: 15999,
     image: '/images/products/keyboard.svg',
     description:
       'A hot-swappable tenkeyless board with magnetic analogue switches, 8000Hz polling, and per-key RGB under doubleshot PBT caps.',
@@ -97,14 +103,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 33,
     ratingAverage: 4.8,
-    ratingCount: 0,
   },
   {
-    id: 'p6',
     name: 'Volt Glide Pro Wireless Mouse',
     brand: 'Volt',
     category: 'Peripherals',
-    price: 89.99,
+    priceCents: 8999,
+    originalPriceCents: null,
     image: '/images/products/mouse.svg',
     description:
       'A 49-gram symmetrical shape with a 32K DPI optical sensor and PTFE feet. Built for competitive FPS with zero smoothing.',
@@ -116,14 +121,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 58,
     ratingAverage: 4.5,
-    ratingCount: 0,
   },
   {
-    id: 'p7',
     name: 'Titan RTX 5080 Graphics Card',
     brand: 'Titan',
     category: 'PC Hardware',
-    price: 1099.0,
+    priceCents: 109900,
+    originalPriceCents: null,
     image: '/images/products/gpu.svg',
     description:
       '16GB GDDR7 with a triple-fan vapour chamber cooler. Handles 4K ultra with ray tracing and frame generation enabled.',
@@ -135,15 +139,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 7,
     ratingAverage: 4.6,
-    ratingCount: 0,
   },
   {
-    id: 'p8',
     name: 'Titan Forge 32GB DDR5-6400 Kit',
     brand: 'Titan',
     category: 'PC Hardware',
-    price: 149.99,
-    originalPrice: 189.99,
+    priceCents: 14999,
+    originalPriceCents: 18999,
     image: '/images/products/gpu.svg',
     description:
       'A 2x16GB DDR5 kit binned for 6400 MT/s at CL32, with a low-profile heatspreader that clears large air coolers.',
@@ -155,14 +157,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 88,
     ratingAverage: 4.5,
-    ratingCount: 0,
   },
   {
-    id: 'p9',
     name: 'Starfall Odyssey',
     brand: 'Meridian Studios',
     category: 'Games',
-    price: 69.99,
+    priceCents: 6999,
+    originalPriceCents: null,
     image: '/images/products/game.svg',
     description:
       'An open-world space RPG spanning forty hand-built systems, with a branching campaign that remembers every choice you make.',
@@ -174,15 +175,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 120,
     ratingAverage: 4.2,
-    ratingCount: 0,
   },
   {
-    id: 'p10',
     name: 'Shadow Protocol II',
     brand: 'Ironline Games',
     category: 'Games',
-    price: 59.99,
-    originalPrice: 69.99,
+    priceCents: 5999,
+    originalPriceCents: 6999,
     image: '/images/products/game.svg',
     description:
       'A tactical stealth shooter with fully destructible cover and an AI director that adapts to how you play.',
@@ -194,14 +193,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 95,
     ratingAverage: 3.9,
-    ratingCount: 0,
   },
   {
-    id: 'p11',
     name: 'Apex Throne Gaming Chair',
     brand: 'Apex',
     category: 'Accessories',
-    price: 349.99,
+    priceCents: 34999,
+    originalPriceCents: null,
     image: '/images/products/chair.svg',
     description:
       'A cold-cure foam chair with 4D armrests, adjustable lumbar support, and a breathable hybrid-weave cover rated to 150kg.',
@@ -213,14 +211,13 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 19,
     ratingAverage: 4.1,
-    ratingCount: 0,
   },
   {
-    id: 'p12',
     name: 'Aurora Stream Pad Mini',
     brand: 'Aurora',
     category: 'Accessories',
-    price: 99.99,
+    priceCents: 9999,
+    originalPriceCents: null,
     image: '/images/products/keyboard.svg',
     description:
       'Fifteen LCD macro keys for scene switching, clip capture, and audio mixing, with profiles that follow the app in focus.',
@@ -232,6 +229,58 @@ export const MOCK_PRODUCTS: Product[] = [
     ],
     stock: 46,
     ratingAverage: 4.4,
-    ratingCount: 0,
   },
 ];
+
+/** 1-based position of "features" among the bound parameters of each row. */
+const FEATURES_PARAM_OFFSET = 8;
+const PARAMS_PER_ROW = 11;
+
+export class SeedProducts1788688269300 implements MigrationInterface {
+  name = 'SeedProducts1788688269300';
+
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    const rows = PRODUCTS.map((_, rowIndex) => {
+      const base = rowIndex * PARAMS_PER_ROW;
+      const placeholders = Array.from(
+        { length: PARAMS_PER_ROW },
+        (_unused, i) =>
+          i + 1 === FEATURES_PARAM_OFFSET
+            ? `$${base + i + 1}::jsonb`
+            : `$${base + i + 1}`,
+      );
+
+      return `(gen_random_uuid(), ${placeholders.join(', ')}, now(), now(), 1)`;
+    });
+
+    const parameters = PRODUCTS.flatMap((product) => [
+      product.name,
+      product.brand,
+      product.category,
+      product.priceCents,
+      product.originalPriceCents,
+      product.image,
+      product.description,
+      JSON.stringify(product.features),
+      product.stock,
+      product.ratingAverage,
+      0,
+    ]);
+
+    await queryRunner.query(
+      `INSERT INTO "products" (
+        "id", "name", "brand", "category", "priceCents", "originalPriceCents",
+        "image", "description", "features", "stock", "ratingAverage",
+        "ratingCount", "createdAt", "updatedAt", "version"
+      ) VALUES
+      ${rows.join(',\n      ')}`,
+      parameters,
+    );
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.query(`DELETE FROM "products" WHERE "name" = ANY($1)`, [
+      PRODUCTS.map((product) => product.name),
+    ]);
+  }
+}
