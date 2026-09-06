@@ -9,7 +9,8 @@ export default new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   ssl: process.env.IS_DB_SSL === 'true',
-  entities: [],
+  uuidExtension: 'pgcrypto',
+  entities: ['src/**/*.entity.ts'],
   migrations: ['src/db/migrations/*.ts'],
   synchronize: false,
 });

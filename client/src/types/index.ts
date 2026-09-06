@@ -23,12 +23,13 @@ export interface Product {
   stock: number
   ratingAverage: number
   ratingCount: number
+  createdAt: string
+  updatedAt: string
 }
 
 export interface Review {
   id: string
   productId: string
-  /** `null` for reviews left by anonymous visitors. */
   authorId: string | null
   authorName: string
   rating: Rating
@@ -39,7 +40,6 @@ export interface Review {
   helpfulCount: number
 }
 
-/** Shape stored in the mock database. `password` never leaves the api layer. */
 export interface StoredUser {
   id: string
   email: string
@@ -48,7 +48,6 @@ export interface StoredUser {
   purchasedProductIds: string[]
 }
 
-/** Public user shape handed to the UI. */
 export type User = Omit<StoredUser, 'password'>
 
 export interface Session {
@@ -61,7 +60,6 @@ export interface ReviewDraft {
   rating: Rating
   title: string
   body: string
-  /** Only used for anonymous submissions; signed-in reviews take the account name. */
   guestName?: string
 }
 
@@ -69,13 +67,11 @@ export type ReviewSort = 'recent' | 'helpful' | 'highest' | 'lowest'
 
 export interface ReviewQuery {
   sort?: ReviewSort
-  /** Filter to a single star rating. */
   rating?: Rating | null
   page?: number
   perPage?: number
 }
 
-/** Mirrors a paginated REST collection response. */
 export interface Paginated<T> {
   items: T[]
   page: number

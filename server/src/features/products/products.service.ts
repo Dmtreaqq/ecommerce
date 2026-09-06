@@ -1,48 +1,83 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateProductDto } from './dto/create-product.dto.js';
 import { FindProductsDto } from './dto/find-products.dto.js';
 import { Product } from './entities/product.entity.js';
-import { MOCK_PRODUCTS } from './mocks/products.js';
+
+const escapeLike = (value: string): string =>
+  value.replace(/[\\%_]/g, (char) => `\\${char}`);
+
+const toCents = (amount: number): number => Math.round(amount * 100);
 
 @Injectable()
 export class ProductsService {
-  private readonly products: Product[] = MOCK_PRODUCTS;
+  constructor(
+    @InjectRepository(Product)
+    private readonly productsRepository: Repository<Product>,
+  ) {}
 
-  findAll(query: FindProductsDto = {}): Product[] {
-    const { category = null, sort = 'featured' } = query;
-    const term = (query.search ?? '').trim().toLowerCase();
+  async findAll(query: FindProductsDto = {}): Promise<Product[]> {
+    const { category, sort = 'featured' } = query;
+    const term = query.search?.trim();
 
-    let items = this.products;
+    const qb = this.productsRepository.createQueryBuilder('product');
 
     if (category) {
-      items = items.filter((product) => product.category === category);
+      qb.andWhere('product.category = :category', { category });
     }
 
     if (term) {
-      items = items.filter(
-        (product) =>
-          product.name.toLowerCase().includes(term) ||
-          product.brand.toLowerCase().includes(term) ||
-          product.description.toLowerCase().includes(term),
+      const pattern = `%${escapeLike(term)}%`;
+      qb.andWhere(
+        '(product.name ILIKE :pattern OR product.brand ILIKE :pattern OR product.description ILIKE :pattern)',
+        { pattern },
       );
     }
 
     switch (sort) {
       case 'price-asc':
-        return [...items].sort((a, b) => a.price - b.price);
+        qb.orderBy('product.priceCents', 'ASC');
+        break;
       case 'price-desc':
-        return [...items].sort((a, b) => b.price - a.price);
+        qb.orderBy('product.priceCents', 'DESC');
+        break;
       case 'rating':
-        return [...items].sort((a, b) => b.ratingAverage - a.ratingAverage);
+        qb.orderBy('product.ratingAverage', 'DESC');
+        break;
       default:
-        return items === this.products ? [...items] : items;
+        break;
     }
+
+    qb.addOrderBy('product.id', 'ASC');
+
+    return qb.getMany();
   }
 
-  findOne(id: string): Product {
-    const product = this.products.find((item) => item.id === id);
+  async findOne(id: string): Promise<Product> {
+    const product = await this.productsRepository.findOne({ where: { id } });
     if (!product) {
       throw new NotFoundException('Product not found');
     }
     return product;
+  }
+
+  async create(dto: CreateProductDto): Promise<Product> {
+    const product = this.productsRepository.create({
+      name: dto.name,
+      brand: dto.brand,
+      category: dto.category,
+      priceCents: toCents(dto.price),
+      originalPriceCents:
+        dto.originalPrice === undefined ? null : toCents(dto.originalPrice),
+      image: dto.image,
+      description: dto.description,
+      features: dto.features ?? [],
+      stock: dto.stock ?? 0,
+      ratingAverage: dto.ratingAverage ?? 0,
+      ratingCount: dto.ratingCount ?? 0,
+    });
+
+    return this.productsRepository.save(product);
   }
 }
