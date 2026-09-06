@@ -1,11 +1,10 @@
-import { MOCK_REVIEWS } from '../mocks/reviews'
 import { MOCK_USERS } from '../mocks/users'
-import type { Product, Review, Session, StoredUser } from '../types'
+import type { Session, StoredUser } from '../types'
 
 /**
  * A tiny localStorage-backed store standing in for the server database.
- * Seeded from `mocks/` on first load; every write persists, so reviews and the
- * signed-in session survive a refresh.
+ * Reviews and products are served by the real API now; only the signed-in
+ * session and the mock user list remain here, until auth lands server-side.
  *
  * Bump `VERSION` to invalidate stored data after a shape change.
  */
@@ -13,7 +12,6 @@ const VERSION = 'v1'
 const key = (name: string) => `gg:${VERSION}:${name}`
 
 const KEYS = {
-  reviews: key('reviews'),
   session: key('session'),
 } as const
 
@@ -43,48 +41,10 @@ function clearKey(storageKey: string): void {
   }
 }
 
-/**
- * In-memory working copy. Reads hit this; writes update it and flush to
- * localStorage, so a storage failure degrades to session-only rather than
- * breaking the app.
- */
-let reviews: Review[] = readJson<Review[]>(KEYS.reviews) ?? [...MOCK_REVIEWS]
-
 // Users are read-only in the mock — there is no registration flow.
 const users: StoredUser[] = MOCK_USERS
 
 export const db = {
-  /**
-   * Overlays review-derived `ratingAverage` / `ratingCount` onto products
-   * fetched from the API. Reviews are still client-side, so the server's seed
-   * rating values are replaced outright rather than merged.
-   */
-  withLiveRatings(products: Product[]): Product[] {
-    return products.map((product) => {
-      const productReviews = reviews.filter((r) => r.productId === product.id)
-      const total = productReviews.length
-      const average =
-        total === 0
-          ? 0
-          : productReviews.reduce((sum, r) => sum + r.rating, 0) / total
-
-      return {
-        ...product,
-        ratingCount: total,
-        ratingAverage: Math.round(average * 10) / 10,
-      }
-    })
-  },
-
-  getReviews(): Review[] {
-    return reviews
-  },
-
-  setReviews(next: Review[]): void {
-    reviews = next
-    writeJson(KEYS.reviews, reviews)
-  },
-
   findUserByEmail(email: string): StoredUser | undefined {
     const normalised = email.trim().toLowerCase()
     return users.find((user) => user.email.toLowerCase() === normalised)

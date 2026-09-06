@@ -63,7 +63,7 @@ export interface ReviewDraft {
   guestName?: string
 }
 
-export type ReviewSort = 'recent' | 'helpful' | 'highest' | 'lowest'
+export type ReviewSort = 'recent' | 'highest' | 'lowest'
 
 export interface ReviewQuery {
   sort?: ReviewSort

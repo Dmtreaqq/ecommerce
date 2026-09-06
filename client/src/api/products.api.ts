@@ -1,6 +1,5 @@
 import type { Product, ProductQuery } from '../types'
 import { assetUrl, http } from './client'
-import { db } from './db'
 
 /**
  * The API returns image paths relative to the server root
@@ -24,13 +23,7 @@ export async function getProducts(
     params: { category, search: search.trim(), sort },
   })
 
-  const rated = db.withLiveRatings(products.map(withImageUrl))
-
-  // The server sorted by its seed ratings, but the stars we render come from
-  // local reviews — re-sort so the order matches what the user actually sees.
-  return sort === 'rating'
-    ? [...rated].sort((a, b) => b.ratingAverage - a.ratingAverage)
-    : rated
+  return products.map(withImageUrl)
 }
 
 /** `GET /products/:id` — a miss surfaces as an `ApiError` with status 404. */
@@ -41,5 +34,5 @@ export async function getProductById(
   const product = await http<Product>(`/products/${encodeURIComponent(id)}`, {
     signal,
   })
-  return db.withLiveRatings([withImageUrl(product)])[0]
+  return withImageUrl(product)
 }

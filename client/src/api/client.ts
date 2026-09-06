@@ -1,7 +1,7 @@
 /**
  * The transport layer.
  *
- * Products come from the real REST API via `http`. Reviews and auth are still
+ * Products and reviews come from the real REST API via `http`. Auth is still
  * served from the localStorage store via `request`, which fakes a round trip —
  * when those endpoints land, delete `request` and this file is done.
  */
@@ -54,6 +54,8 @@ async function readErrorMessage(response: Response): Promise<string> {
 export async function http<T>(
   path: string,
   options: {
+    method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
+    body?: unknown
     signal?: AbortSignal
     params?: Record<string, string | null | undefined>
   } = {},
@@ -63,11 +65,18 @@ export async function http<T>(
     if (value) url.searchParams.set(key, value)
   }
 
+  const hasBody = options.body !== undefined
+
   let response: Response
   try {
     response = await fetch(url, {
+      method: options.method ?? 'GET',
       signal: options.signal,
-      headers: { Accept: 'application/json' },
+      headers: {
+        Accept: 'application/json',
+        ...(hasBody && { 'Content-Type': 'application/json' }),
+      },
+      ...(hasBody && { body: JSON.stringify(options.body) }),
     })
   } catch (error) {
     // Cancellation propagates untouched; everything else is a network fault.
@@ -78,6 +87,9 @@ export async function http<T>(
   if (!response.ok) {
     throw new ApiError(await readErrorMessage(response), response.status)
   }
+
+  // 204 carries no body — DELETE resolves with nothing to parse.
+  if (response.status === 204) return undefined as T
 
   return response.json() as Promise<T>
 }

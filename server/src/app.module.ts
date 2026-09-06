@@ -5,6 +5,7 @@ import { CommonModule } from './common/common.module.js';
 import { configDynamicModule } from './config-dynamic-module.js';
 import { UsersModule } from './features/users/users.module.js';
 import { ProductsModule } from './features/products/products.module.js';
+import { ReviewsModule } from './features/reviews/reviews.module.js';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ProductsModule } from './features/products/products.module.js';
     }),
     UsersModule,
     ProductsModule,
+    ReviewsModule,
   ],
   controllers: [],
   providers: [],

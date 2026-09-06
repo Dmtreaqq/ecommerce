@@ -7,9 +7,8 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useCallback, useId, useState, type FormEvent } from 'react'
-import { Link as RouterLink, useLocation } from 'react-router-dom'
 import { toErrorMessage } from '../../api/client'
-import type { Rating as StarRating, Review, ReviewDraft } from '../../types'
+import type { Rating as StarRating, ReviewDraft } from '../../types'
 
 const RATING_LABELS: Record<number, string> = {
   1: 'Hated it',
@@ -29,43 +28,23 @@ interface FieldErrors {
   guestName?: string
 }
 
-export interface ReviewFormValues {
-  rating: StarRating
-  title: string
-  body: string
-  guestName?: string
-}
-
 interface ReviewFormProps {
-  /** Present when editing an existing review rather than writing a new one. */
-  initialReview?: Review | null
-  isSignedIn: boolean
   onSubmit: (values: Omit<ReviewDraft, 'productId'>) => Promise<void>
   onCancel: () => void
 }
 
-export function ReviewForm({
-  initialReview,
-  isSignedIn,
-  onSubmit,
-  onCancel,
-}: ReviewFormProps) {
-  const location = useLocation()
+export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
   const fieldId = useId()
 
-  const [rating, setRating] = useState<number | null>(
-    initialReview?.rating ?? null,
-  )
+  const [rating, setRating] = useState<number | null>(null)
   const [hoverRating, setHoverRating] = useState(-1)
-  const [title, setTitle] = useState(initialReview?.title ?? '')
-  const [body, setBody] = useState(initialReview?.body ?? '')
+  const [title, setTitle] = useState('')
+  const [body, setBody] = useState('')
   const [guestName, setGuestName] = useState('')
 
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
-
-  const isEditing = Boolean(initialReview)
 
   const validate = useCallback((): FieldErrors => {
     const next: FieldErrors = {}
@@ -85,12 +64,12 @@ export function ReviewForm({
     } else if (trimmedBody.length > BODY_MAX) {
       next.body = `Review must be ${BODY_MAX} characters or fewer.`
     }
-    if (!isSignedIn && !isEditing && !guestName.trim()) {
+    if (!guestName.trim()) {
       next.guestName = 'Please enter your name.'
     }
 
     return next
-  }, [rating, title, body, guestName, isSignedIn, isEditing])
+  }, [rating, title, body, guestName])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -107,7 +86,7 @@ export function ReviewForm({
           rating: rating as StarRating,
           title: title.trim(),
           body: body.trim(),
-          ...(isSignedIn ? {} : { guestName: guestName.trim() }),
+          guestName: guestName.trim(),
         })
       } catch (error: unknown) {
         setSubmitError(toErrorMessage(error))
@@ -115,7 +94,7 @@ export function ReviewForm({
         setSubmitting(false)
       }
     },
-    [validate, onSubmit, rating, title, body, guestName, isSignedIn],
+    [validate, onSubmit, rating, title, body, guestName],
   )
 
   const displayRating = hoverRating !== -1 ? hoverRating : (rating ?? 0)
@@ -123,21 +102,6 @@ export function ReviewForm({
   return (
     <Box component="form" onSubmit={handleSubmit} noValidate>
       <Stack spacing={2.5}>
-        {!isSignedIn && !isEditing ? (
-          <Alert severity="info" variant="outlined">
-            You can review as a guest.{' '}
-            <Box
-              component={RouterLink}
-              to="/signin"
-              state={{ from: location.pathname + location.search }}
-              sx={{ color: 'primary.main', fontWeight: 600 }}
-            >
-              Sign in
-            </Box>{' '}
-            to get the Verified Purchase badge on products you have bought.
-          </Alert>
-        ) : null}
-
         {submitError ? (
           <Alert severity="error" onClose={() => setSubmitError(null)}>
             {submitError}
@@ -176,18 +140,16 @@ export function ReviewForm({
           ) : null}
         </Box>
 
-        {!isSignedIn && !isEditing ? (
-          <TextField
-            label="Your name"
-            value={guestName}
-            onChange={(event) => setGuestName(event.target.value)}
-            error={Boolean(errors.guestName)}
-            helperText={errors.guestName}
-            required
-            fullWidth
-            slotProps={{ htmlInput: { maxLength: 60 } }}
-           />
-        ) : null}
+        <TextField
+          label="Your name"
+          value={guestName}
+          onChange={(event) => setGuestName(event.target.value)}
+          error={Boolean(errors.guestName)}
+          helperText={errors.guestName}
+          required
+          fullWidth
+          slotProps={{ htmlInput: { maxLength: 60 } }}
+         />
 
         <TextField
           label="Add a headline"
@@ -225,7 +187,7 @@ export function ReviewForm({
             loading={submitting}
             sx={{ minWidth: 160 }}
           >
-            {isEditing ? 'Save changes' : 'Submit review'}
+            Submit review
           </Button>
         </Stack>
       </Stack>

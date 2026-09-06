@@ -6,6 +6,10 @@ Monorepo with two folders: `client/` (frontend) and `server/` (backend).
 - Only comment on things that aren't obvious from the code itself: tricky workarounds, non-standard business logic, or "why", not "what".
 - Don't leave TODO/FIXME comments unless I explicitly ask for them.
 
+## Database indexes
+- Never add a database index on your own. Ask me first.
+- When proposing one, explain which query it speeds up and why the index is needed, then let me decide whether to add it now or later.
+
 ## Dev servers
 - Never leave a dev server running in the background once you're done testing a feature.
 - Before ending your turn, check for and kill any background process you started (e.g. `npm run dev`, `nodemon`, etc.).

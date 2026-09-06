@@ -10,7 +10,6 @@ import type { Rating, ReviewSort } from '../../types'
 
 const SORT_OPTIONS: { value: ReviewSort; label: string }[] = [
   { value: 'recent', label: 'Most recent' },
-  { value: 'helpful', label: 'Most helpful' },
   { value: 'highest', label: 'Highest rated' },
   { value: 'lowest', label: 'Lowest rated' },
 ]
