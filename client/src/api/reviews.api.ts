@@ -47,7 +47,7 @@ export function getReviewStats(
   return http<ReviewStats>(`${productPath(productId)}/stats`, { signal })
 }
 
-/** `POST /reviews` — reviews are guest-only until authentication lands. */
+/** `POST /reviews` — the author comes from the session cookie, not the body. */
 export function createReview(
   draft: ReviewDraft,
   signal?: AbortSignal,
@@ -57,7 +57,6 @@ export function createReview(
     signal,
     body: {
       productId: draft.productId,
-      authorName: draft.guestName ?? '',
       rating: draft.rating,
       title: draft.title,
       body: draft.body,

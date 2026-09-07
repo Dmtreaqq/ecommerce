@@ -7,6 +7,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  MinLength,
 } from 'class-validator';
 import { configUtilityHelper } from './utils/config-utility.helper.js';
 
@@ -57,6 +58,35 @@ export class CommonConfig {
   @IsBoolean({ message: 'IS_DB_LOGGING should be either true or false' })
   isDbLogging: boolean;
 
+  @IsNotEmpty({ message: 'JWT_ACCESS_SECRET should not be empty' })
+  @IsString({ message: 'JWT_ACCESS_SECRET should be a string' })
+  @MinLength(32, {
+    message: 'JWT_ACCESS_SECRET should be at least 32 characters',
+  })
+  jwtAccessSecret: string;
+
+  @IsNotEmpty({ message: 'JWT_REFRESH_SECRET should not be empty' })
+  @IsString({ message: 'JWT_REFRESH_SECRET should be a string' })
+  @MinLength(32, {
+    message: 'JWT_REFRESH_SECRET should be at least 32 characters',
+  })
+  jwtRefreshSecret: string;
+
+  @IsNumber(
+    {},
+    { message: 'Set env variable JWT_ACCESS_TTL_SECONDS, example: 900' },
+  )
+  jwtAccessTtlSeconds: number;
+
+  @IsNumber(
+    {},
+    { message: 'Set env variable JWT_REFRESH_TTL_SECONDS, example: 1209600' },
+  )
+  jwtRefreshTtlSeconds: number;
+
+  @IsBoolean({ message: 'IS_COOKIE_SECURE should be either true or false' })
+  isCookieSecure: boolean;
+
   constructor(configService: ConfigService) {
     const read = (key: string) => {
       const value = configService.get<string>(key)?.trim();
@@ -79,6 +109,19 @@ export class CommonConfig {
     ) as boolean;
     this.isDbLogging = configUtilityHelper.convertToBoolean(
       read('IS_DB_LOGGING'),
+    ) as boolean;
+
+    this.jwtAccessSecret = read('JWT_ACCESS_SECRET') as string;
+    this.jwtRefreshSecret = read('JWT_REFRESH_SECRET') as string;
+    this.jwtAccessTtlSeconds = configUtilityHelper.convertToNumber(
+      read('JWT_ACCESS_TTL_SECONDS'),
+    );
+    this.jwtRefreshTtlSeconds = configUtilityHelper.convertToNumber(
+      read('JWT_REFRESH_TTL_SECONDS'),
+    );
+
+    this.isCookieSecure = configUtilityHelper.convertToBoolean(
+      read('IS_COOKIE_SECURE'),
     ) as boolean;
 
     configUtilityHelper.validateConfig(this);

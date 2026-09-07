@@ -9,8 +9,12 @@ import {
   Post,
   Put,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import type { PaginatedResponseDto } from '../../common/dto/paginated-response.dto.js';
+import { CurrentUser } from '../auth/decorators/current-user.decorator.js';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
+import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
 import { FindReviewsDto } from './dto/find-reviews.dto.js';
 import { ReviewResponseDto } from './dto/review-response.dto.js';
@@ -44,23 +48,33 @@ export class ReviewsController {
   constructor(private readonly reviewsService: ReviewsService) {}
 
   @Post()
-  async create(@Body() dto: CreateReviewDto): Promise<ReviewResponseDto> {
-    const review = await this.reviewsService.create(dto);
+  @UseGuards(JwtAuthGuard)
+  async create(
+    @Body() dto: CreateReviewDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<ReviewResponseDto> {
+    const review = await this.reviewsService.create(dto, user);
     return ReviewResponseDto.fromEntity(review);
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateReviewDto,
+    @CurrentUser() user: AuthenticatedUser,
   ): Promise<ReviewResponseDto> {
-    const review = await this.reviewsService.update(id, dto);
+    const review = await this.reviewsService.update(id, dto, user);
     return ReviewResponseDto.fromEntity(review);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @HttpCode(204)
-  async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
-    await this.reviewsService.remove(id);
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ): Promise<void> {
+    await this.reviewsService.remove(id, user);
   }
 }

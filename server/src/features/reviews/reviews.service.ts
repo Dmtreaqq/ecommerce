@@ -1,6 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import {
+  DataSource,
+  EntityManager,
+  QueryFailedError,
+  Repository,
+} from 'typeorm';
+import type { AuthenticatedUser } from '../auth/types/authenticated-user.js';
 import {
   clampPage,
   totalPagesFor,
@@ -17,6 +28,8 @@ import { UpdateReviewDto } from './dto/update-review.dto.js';
 import { Review } from './entities/review.entity.js';
 
 const roundToTenth = (value: number): number => Math.round(value * 10) / 10;
+
+const UNIQUE_VIOLATION = '23505';
 
 interface RatingTally {
   rating: number;
@@ -130,36 +143,58 @@ export class ReviewsService {
     return review;
   }
 
-  async create(dto: CreateReviewDto): Promise<Review> {
-    return this.dataSource.transaction(async (manager) => {
-      const exists = await manager.exists(Product, {
-        where: { id: dto.productId },
+  async create(
+    dto: CreateReviewDto,
+    author: AuthenticatedUser,
+  ): Promise<Review> {
+    try {
+      return await this.dataSource.transaction(async (manager) => {
+        const exists = await manager.exists(Product, {
+          where: { id: dto.productId },
+        });
+        if (!exists) {
+          throw new NotFoundException('Product not found');
+        }
+
+        const review = manager.create(Review, {
+          productId: dto.productId,
+          authorId: author.id,
+          authorName: author.name,
+          rating: dto.rating,
+          title: dto.title,
+          body: dto.body,
+        });
+        const saved = await manager.save(review);
+
+        await this.recalculateProductRating(manager, dto.productId);
+
+        return saved;
       });
-      if (!exists) {
-        throw new NotFoundException('Product not found');
+    } catch (error) {
+      // Caught outside the transaction: a unique violation aborts it, so the
+      // recalculate above would fail before this could run inside.
+      if (
+        error instanceof QueryFailedError &&
+        (error as QueryFailedError & { code?: string }).code ===
+          UNIQUE_VIOLATION
+      ) {
+        throw new ConflictException('You have already reviewed this product');
       }
-
-      const review = manager.create(Review, {
-        productId: dto.productId,
-        authorName: dto.authorName,
-        rating: dto.rating,
-        title: dto.title,
-        body: dto.body,
-      });
-      const saved = await manager.save(review);
-
-      await this.recalculateProductRating(manager, dto.productId);
-
-      return saved;
-    });
+      throw error;
+    }
   }
 
-  async update(id: string, dto: UpdateReviewDto): Promise<Review> {
+  async update(
+    id: string,
+    dto: UpdateReviewDto,
+    author: AuthenticatedUser,
+  ): Promise<Review> {
     return this.dataSource.transaction(async (manager) => {
       const review = await manager.findOne(Review, { where: { id } });
       if (!review) {
         throw new NotFoundException('Review not found');
       }
+      this.assertOwnership(review, author);
 
       review.rating = dto.rating;
       review.title = dto.title;
@@ -172,17 +207,28 @@ export class ReviewsService {
     });
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, author: AuthenticatedUser): Promise<void> {
     await this.dataSource.transaction(async (manager) => {
       const review = await manager.findOne(Review, { where: { id } });
       if (!review) {
         throw new NotFoundException('Review not found');
       }
+      this.assertOwnership(review, author);
 
       await manager.softRemove(review);
 
       await this.recalculateProductRating(manager, review.productId);
     });
+  }
+
+  /**
+   * Legacy guest reviews carry a null authorId, so no signed-in user matches
+   * them and they are effectively frozen.
+   */
+  private assertOwnership(review: Review, author: AuthenticatedUser): void {
+    if (review.authorId !== author.id) {
+      throw new ForbiddenException('You can only modify your own review');
+    }
   }
 
   private async assertProductExists(productId: string): Promise<void> {

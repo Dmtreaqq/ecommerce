@@ -1,60 +1,47 @@
-import type { Session, StoredUser, User } from '../types'
-import { ApiError, request } from './client'
-import { db } from './db'
+import type { User } from '../types'
+import { ApiError, http } from './client'
 
-/** Never let the stored password escape the api layer. */
-function toPublicUser(stored: StoredUser): User {
-  const { password, ...user } = stored
-  void password
-  return user
+/** `POST /auth/register` — creates the account and opens a session, like login. */
+export function signUp(
+  name: string,
+  email: string,
+  password: string,
+  signal?: AbortSignal,
+): Promise<User> {
+  return http<User>('/auth/register', {
+    method: 'POST',
+    signal,
+    body: { email, name, password },
+  })
 }
 
-/** Mirrors `POST /auth/login`. */
+/** `POST /auth/login` — the server replies with httpOnly session cookies. */
 export function signIn(
   email: string,
   password: string,
   signal?: AbortSignal,
-): Promise<Session> {
-  return request(() => {
-    const user = db.findUserByEmail(email)
-
-    // Deliberately vague: never reveal whether the email exists.
-    if (!user || user.password !== password) {
-      throw new ApiError('Incorrect email or password.', 401)
-    }
-
-    const session: Session = {
-      user: toPublicUser(user),
-      token: `mock-token-${user.id}-${Date.now()}`,
-    }
-
-    db.setSession(session)
-    return session
-  }, signal)
+): Promise<User> {
+  return http<User>('/auth/login', {
+    method: 'POST',
+    signal,
+    body: { email, password },
+  })
 }
 
-/** Mirrors `POST /auth/logout`. */
+/** `POST /auth/logout` — clears the session cookies. */
 export function signOut(signal?: AbortSignal): Promise<void> {
-  return request(() => {
-    db.clearSession()
-  }, signal)
+  return http<void>('/auth/logout', { method: 'POST', signal })
 }
 
 /**
- * Mirrors `GET /auth/me`. Resolves the persisted session against the current
- * user list so a stale session for a removed user is discarded.
+ * `GET /auth/me`. Only a 401 becomes `null`: a network failure must keep
+ * propagating so "signed out" stays distinguishable from "server unreachable".
  */
-export function getSession(signal?: AbortSignal): Promise<Session | null> {
-  return request(() => {
-    const session = db.getSession()
-    if (!session) return null
-
-    const user = db.findUserById(session.user.id)
-    if (!user) {
-      db.clearSession()
-      return null
-    }
-
-    return { ...session, user: toPublicUser(user) }
-  }, signal)
+export async function getSession(signal?: AbortSignal): Promise<User | null> {
+  try {
+    return await http<User>('/auth/me', { signal })
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return null
+    throw error
+  }
 }

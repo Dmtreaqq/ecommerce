@@ -10,12 +10,13 @@ export class ReviewResponseDto {
   createdAt: string;
   updatedAt: string;
 
+  /** Null for the guest reviews written before authentication existed. */
+  authorId: string | null;
+
   /**
-   * Placeholders until authentication lands: reviews are guest-only, so there
-   * is no author to attribute, no purchase history to verify against, and no
-   * identity to attach a helpful vote to.
+   * Still placeholders: there is no purchase history to verify against and no
+   * store of helpful votes.
    */
-  authorId: null;
   verifiedPurchase: false;
   helpfulCount: number;
 
@@ -29,7 +30,7 @@ export class ReviewResponseDto {
       body: review.body,
       createdAt: review.createdAt.toISOString(),
       updatedAt: review.updatedAt.toISOString(),
-      authorId: null,
+      authorId: review.authorId,
       verifiedPurchase: false,
       helpfulCount: 0,
     };

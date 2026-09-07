@@ -14,3 +14,7 @@ Monorepo with two folders: `client/` (frontend) and `server/` (backend).
 - Never leave a dev server running in the background once you're done testing a feature.
 - Before ending your turn, check for and kill any background process you started (e.g. `npm run dev`, `nodemon`, etc.).
 - Prefer one-off commands for verification (e.g. `curl localhost:PORT/api/health`) over keeping a server alive for the whole session.
+
+## Browser automation
+- Never leave a Playwright/MCP browser open once you're done testing a feature.
+- Before ending your turn, close the browser (e.g. `browser_close`) — this applies even when I started the dev servers myself and you only drove the browser.

@@ -11,6 +11,7 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { Product } from '../../products/entities/product.entity.js';
+import { User } from '../../users/entities/user.entity.js';
 
 @Entity('reviews')
 export class Review {
@@ -25,6 +26,18 @@ export class Review {
   @JoinColumn({ name: 'productId' })
   product: Product;
 
+  /**
+   * Null for the guest reviews that predate authentication. Set from the JWT
+   * on every new review.
+   */
+  @Column({ type: 'uuid', nullable: true })
+  authorId: string | null;
+
+  @ManyToOne(() => User, { onDelete: 'SET NULL', nullable: true })
+  @JoinColumn({ name: 'authorId' })
+  author: User | null;
+
+  /** Snapshot of the author's display name at write time. */
   @Column({ type: 'varchar', length: 100 })
   authorName: string;
 

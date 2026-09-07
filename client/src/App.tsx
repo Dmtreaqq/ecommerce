@@ -11,6 +11,7 @@ import { theme } from './theme'
 const HomePage = lazy(() => import('./pages/HomePage'))
 const ProductPage = lazy(() => import('./pages/ProductPage'))
 const SignInPage = lazy(() => import('./pages/SignInPage'))
+const SignUpPage = lazy(() => import('./pages/SignUpPage'))
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'))
 
 const withSuspense = (element: React.ReactNode) => (
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
       { index: true, element: withSuspense(<HomePage />) },
       { path: 'product/:id', element: withSuspense(<ProductPage />) },
       { path: 'signin', element: withSuspense(<SignInPage />) },
+      { path: 'signup', element: withSuspense(<SignUpPage />) },
       { path: '*', element: withSuspense(<NotFoundPage />) },
     ],
   },

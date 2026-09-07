@@ -45,16 +45,27 @@ export function Header() {
     navigate('/')
   }, [closeMenu, signOut, navigate])
 
-  const signInLink = (
-    <Button
-      component={RouterLink}
-      to="/signin"
-      state={{ from: location.pathname + location.search }}
-      variant="contained"
-      size="small"
-    >
-      Sign in
-    </Button>
+  const authLinks = (
+    <Stack direction="row" spacing={1}>
+      <Button
+        component={RouterLink}
+        to="/signup"
+        state={{ from: location.pathname + location.search }}
+        variant="outlined"
+        size="small"
+      >
+        Sign up
+      </Button>
+      <Button
+        component={RouterLink}
+        to="/signin"
+        state={{ from: location.pathname + location.search }}
+        variant="contained"
+        size="small"
+      >
+        Sign in
+      </Button>
+    </Stack>
   )
 
   return (
@@ -138,7 +149,7 @@ export function Header() {
             </Menu>
           </>
         ) : (
-          signInLink
+          authLinks
         )}
       </Toolbar>
     </AppBar>
