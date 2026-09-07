@@ -25,7 +25,6 @@ interface FieldErrors {
   rating?: string
   title?: string
   body?: string
-  guestName?: string
 }
 
 interface ReviewFormProps {
@@ -40,7 +39,6 @@ export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
   const [hoverRating, setHoverRating] = useState(-1)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
-  const [guestName, setGuestName] = useState('')
 
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -64,12 +62,9 @@ export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
     } else if (trimmedBody.length > BODY_MAX) {
       next.body = `Review must be ${BODY_MAX} characters or fewer.`
     }
-    if (!guestName.trim()) {
-      next.guestName = 'Please enter your name.'
-    }
 
     return next
-  }, [rating, title, body, guestName])
+  }, [rating, title, body])
 
   const handleSubmit = useCallback(
     async (event: FormEvent<HTMLFormElement>) => {
@@ -86,7 +81,6 @@ export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
           rating: rating as StarRating,
           title: title.trim(),
           body: body.trim(),
-          guestName: guestName.trim(),
         })
       } catch (error: unknown) {
         setSubmitError(toErrorMessage(error))
@@ -94,7 +88,7 @@ export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
         setSubmitting(false)
       }
     },
-    [validate, onSubmit, rating, title, body, guestName],
+    [validate, onSubmit, rating, title, body],
   )
 
   const displayRating = hoverRating !== -1 ? hoverRating : (rating ?? 0)
@@ -140,16 +134,6 @@ export function ReviewForm({ onSubmit, onCancel }: ReviewFormProps) {
           ) : null}
         </Box>
 
-        <TextField
-          label="Your name"
-          value={guestName}
-          onChange={(event) => setGuestName(event.target.value)}
-          error={Boolean(errors.guestName)}
-          helperText={errors.guestName}
-          required
-          fullWidth
-          slotProps={{ htmlInput: { maxLength: 60 } }}
-         />
 
         <TextField
           label="Add a headline"

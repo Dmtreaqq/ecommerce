@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CommonConfig } from './common/common.config.js';
 import { CommonModule } from './common/common.module.js';
 import { configDynamicModule } from './config-dynamic-module.js';
+import { AuthModule } from './features/auth/auth.module.js';
 import { UsersModule } from './features/users/users.module.js';
 import { ProductsModule } from './features/products/products.module.js';
 import { ReviewsModule } from './features/reviews/reviews.module.js';
@@ -28,6 +29,7 @@ import { ReviewsModule } from './features/reviews/reviews.module.js';
       }),
     }),
     UsersModule,
+    AuthModule,
     ProductsModule,
     ReviewsModule,
   ],

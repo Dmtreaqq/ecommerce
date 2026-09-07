@@ -13,12 +13,6 @@ export class CreateReviewDto {
   @IsUUID()
   productId: string;
 
-  @Trimmed()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(100)
-  authorName: string;
-
   @IsInt()
   @Min(1)
   @Max(5)

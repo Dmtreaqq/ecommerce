@@ -19,9 +19,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     authApi
       .getSession(controller.signal)
-      .then((session) => {
-        setUser(session?.user ?? null)
-        setStatus(session ? 'authenticated' : 'anonymous')
+      .then((currentUser) => {
+        setUser(currentUser)
+        setStatus(currentUser ? 'authenticated' : 'anonymous')
       })
       .catch((error: unknown) => {
         if (isAbortError(error)) return
@@ -32,10 +32,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => controller.abort()
   }, [])
 
+  const signUp = useCallback(
+    async (name: string, email: string, password: string) => {
+      const signedUp = await authApi.signUp(name, email, password)
+      setUser(signedUp)
+      setStatus('authenticated')
+    },
+    [],
+  )
+
   const signIn = useCallback(async (email: string, password: string) => {
     // Let the caller surface the error; only commit state on success.
-    const session = await authApi.signIn(email, password)
-    setUser(session.user)
+    const signedIn = await authApi.signIn(email, password)
+    setUser(signedIn)
     setStatus('authenticated')
   }, [])
 
@@ -46,8 +55,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, status, signIn, signOut }),
-    [user, status, signIn, signOut],
+    () => ({ user, status, signUp, signIn, signOut }),
+    [user, status, signUp, signIn, signOut],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

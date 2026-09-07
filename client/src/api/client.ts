@@ -1,10 +1,4 @@
-/**
- * The transport layer.
- *
- * Products and reviews come from the real REST API via `http`. Auth is still
- * served from the localStorage store via `request`, which fakes a round trip —
- * when those endpoints land, delete `request` and this file is done.
- */
+/** The transport layer: every call goes to the real REST API via `http`. */
 
 export class ApiError extends Error {
   readonly status: number
@@ -72,6 +66,8 @@ export async function http<T>(
     response = await fetch(url, {
       method: options.method ?? 'GET',
       signal: options.signal,
+      // The session lives in httpOnly cookies, so they must ride along.
+      credentials: 'include',
       headers: {
         Accept: 'application/json',
         ...(hasBody && { 'Content-Type': 'application/json' }),
@@ -92,48 +88,6 @@ export async function http<T>(
   if (response.status === 204) return undefined as T
 
   return response.json() as Promise<T>
-}
-
-const MIN_LATENCY_MS = 180
-const MAX_LATENCY_MS = 420
-
-const randomLatency = (): number =>
-  MIN_LATENCY_MS + Math.random() * (MAX_LATENCY_MS - MIN_LATENCY_MS)
-
-/**
- * Simulates a network round trip. Resolves with the producer's value, or
- * rejects with whatever it throws — mirroring how a real client surfaces
- * non-2xx responses as `ApiError`.
- *
- * Pass an `AbortSignal` to make an in-flight call reject with an `AbortError`,
- * exactly as `fetch` would, so callers can cancel on unmount.
- */
-export function request<T>(
-  producer: () => T | Promise<T>,
-  signal?: AbortSignal,
-): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    if (signal?.aborted) {
-      reject(new DOMException('Aborted', 'AbortError'))
-      return
-    }
-
-    const timer = setTimeout(() => {
-      signal?.removeEventListener('abort', onAbort)
-      try {
-        Promise.resolve(producer()).then(resolve, reject)
-      } catch (error) {
-        reject(error)
-      }
-    }, randomLatency())
-
-    function onAbort() {
-      clearTimeout(timer)
-      reject(new DOMException('Aborted', 'AbortError'))
-    }
-
-    signal?.addEventListener('abort', onAbort, { once: true })
-  })
 }
 
 /** True when a rejection came from cancelling the request, not from a failure. */

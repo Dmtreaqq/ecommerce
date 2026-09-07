@@ -30,7 +30,7 @@ const PRODUCTS: SeedProduct[] = [
       'Backwards compatible with the full Nexus library',
     ],
     stock: 12,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Nexus Station X Slim',
@@ -48,7 +48,7 @@ const PRODUCTS: SeedProduct[] = [
       'Whisper-quiet vapour chamber cooling',
     ],
     stock: 27,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Pulse Elite Wireless Controller',
@@ -102,7 +102,7 @@ const PRODUCTS: SeedProduct[] = [
       'Gasket-mounted aluminium chassis',
     ],
     stock: 33,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Volt Glide Pro Wireless Mouse',
@@ -120,7 +120,7 @@ const PRODUCTS: SeedProduct[] = [
       '90-hour battery life',
     ],
     stock: 58,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Titan RTX 5080 Graphics Card',
@@ -138,7 +138,7 @@ const PRODUCTS: SeedProduct[] = [
       'Dual 8-pin, 320W TDP',
     ],
     stock: 7,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Titan Forge 32GB DDR5-6400 Kit',
@@ -156,7 +156,7 @@ const PRODUCTS: SeedProduct[] = [
       'Lifetime warranty',
     ],
     stock: 88,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Starfall Odyssey',
@@ -174,7 +174,7 @@ const PRODUCTS: SeedProduct[] = [
       'Free post-launch expansions',
     ],
     stock: 120,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Shadow Protocol II',
@@ -192,7 +192,7 @@ const PRODUCTS: SeedProduct[] = [
       'Cross-platform multiplayer',
     ],
     stock: 95,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Apex Throne Gaming Chair',
@@ -210,7 +210,7 @@ const PRODUCTS: SeedProduct[] = [
       'Class-4 gas lift, 150kg rating',
     ],
     stock: 19,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
   {
     name: 'Aurora Stream Pad Mini',
@@ -228,7 +228,7 @@ const PRODUCTS: SeedProduct[] = [
       'Plugin support for major streaming apps',
     ],
     stock: 46,
-    ratingAverage: 0
+    ratingAverage: 0,
   },
 ];
 

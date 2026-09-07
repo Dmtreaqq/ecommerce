@@ -40,19 +40,11 @@ export interface Review {
   helpfulCount: number
 }
 
-export interface StoredUser {
+export interface User {
   id: string
   email: string
-  password: string
   name: string
   purchasedProductIds: string[]
-}
-
-export type User = Omit<StoredUser, 'password'>
-
-export interface Session {
-  user: User
-  token: string
 }
 
 export interface ReviewDraft {
@@ -60,7 +52,6 @@ export interface ReviewDraft {
   rating: Rating
   title: string
   body: string
-  guestName?: string
 }
 
 export type ReviewSort = 'recent' | 'highest' | 'lowest'

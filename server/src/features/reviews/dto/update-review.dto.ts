@@ -1,6 +1,12 @@
-import { IsInt, IsString, Max, MaxLength, Min, MinLength } from 'class-validator';
+import {
+  IsInt,
+  IsString,
+  Max,
+  MaxLength,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { Trimmed } from '../../../common/decorators/trimmed.decorator.js';
-
 
 export class UpdateReviewDto {
   @IsInt()
